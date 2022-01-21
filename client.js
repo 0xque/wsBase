@@ -1,32 +1,46 @@
 const ws = new WebSocket("ws://localhost:8082");
 
-newIn = async (ws) => {
+var button = document.createElement("button");
+var clearButton = document.createElement("button");
+var inputForm = document.createElement("form");
+var inputField = document.createElement("input");
+var chatBox = document.createElement("div");
+
+clearButton.innerHTML = "CLEAR CHAT";
+button.innerHTML = "SEND";
+button.setAttribute("id", "/sendButton");
+inputField.setAttribute("id", "/inField");
+inputField.setAttribute("type", "text");
+inputForm.append(inputField);
+
+document.body.append(inputForm);
+document.body.append(button);
+document.body.append(clearButton);
+document.body.append(chatBox);
+
+newIn = async (ws, username) => {
     let inputPromise = new Promise((res, rej) => {
-		setTimeout(() => {
-			let userIn = window.prompt("MESSAGE > ");
-			res(userIn);
-		}, 100);
-    }).then(value => {
-        ws.send(value);
+        let userMSG = inputField.value;
+        res(userMSG);
     })
+    let dataObj = {
+        userNick: username,
+        data: await inputPromise
+    }
+    ws.send(JSON.stringify(dataObj));
 }
 ws.addEventListener('open', () => {
-
+    var username = window.prompt("NICKNAME: ");
     console.log("CONNECTED TO SERVER");
 
+    button.onclick = () => {
+        newIn(ws);
+    }    
+
     ws.onmessage = (event) => {
-        console.log("RECEIVED DATA:", event.data);
+        let eObj = JSON.parse(event.data);    
+        chatBox.innerHTML += "\n" + eObj.data;
     }
-    document.addEventListener('keyup', (key) => {
-        promptCheck = false;  
-    })
-    document.addEventListener('keydown', (key) => {
-        if (key.code == "KeyF") {
-            newIn(ws);
-        } else {
-            console.log(key.code);
-        }
-    })
     ws.onclose = () => {
         console.log("SERVER DISCONNECTED");
     }
