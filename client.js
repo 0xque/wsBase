@@ -6,6 +6,7 @@ var inputForm = document.createElement("form");
 var inputField = document.createElement("input");
 var chatBox = document.createElement("div");
 
+chatBox.innerHTML = "<br>";
 clearButton.innerHTML = "CLEAR CHAT";
 button.innerHTML = "SEND";
 button.setAttribute("id", "/sendButton");
@@ -29,17 +30,20 @@ newIn = async (ws, username) => {
     }
     ws.send(JSON.stringify(dataObj));
 }
-ws.addEventListener('open', () => {
+ws.addEventListener("open", () => {
     var username = window.prompt("NICKNAME: ");
     console.log("CONNECTED TO SERVER");
 
     button.onclick = () => {
-        newIn(ws);
-    }    
-
+        newIn(ws, username);
+    }
+    clearButton.onclick = () => {
+        chatBox.innerHTML = `<br>`;
+    }   
     ws.onmessage = (event) => {
-        let eObj = JSON.parse(event.data);    
-        chatBox.innerHTML += "\n" + eObj.data;
+        let eObj = JSON.parse(event.data);
+        let nick = `<span style="color: gray">{userNick:` + `<span style="color:red">${eObj.userNick}</span></span>` + `<span style="color: gray">}&nbsp;</span>`
+        chatBox.innerHTML += nick + `<span>${eObj.data}</span>` + `<br>`;
     }
     ws.onclose = () => {
         console.log("SERVER DISCONNECTED");
